@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis and Visualization</title>
+    <!-- Link Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS for Tailwind -->
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Main Container -->
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+            <h1 class="text-center text-primary mb-4">Data Analysis and Visualization</h1>
+
+            <!-- File Upload Section -->
+            <div class="border p-4 mb-4 bg-light rounded">
+                <h3 class="h5">Step 1: Upload Your Data</h3>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="file_upload" value="true">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Upload Excel File</label>
+                        <input type="file" name="file" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+            </div>
+
+            {% if data_preview %}
+            <!-- Data Preview Section -->
+            <div class="border p-4 mb-4 bg-light rounded">
+                <h3 class="h5">Step 2: Data Preview</h3>
+                <div class="overflow-auto">
+                    {{ data_preview|safe }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if numeric_cols %}
+            <!-- Statistics and Visualization Section -->
+            <div class="border p-4 mb-4 bg-light rounded">
+                <h3 class="h5">Step 3: Perform Analysis</h3>
+
+                <!-- Statistics Form -->
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="calculate_stats" value="true">
+                    <div class="mb-3">
+                        <label for="selected_column" class="form-label">Select Numeric Column</label>
+                        <select name="selected_column" class="form-select">
+                            {% for col in numeric_cols %}
+                            <option value="{{ col }}">{{ col }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Calculate Statistics</button>
+                </form>
+
+                <!-- Visualization Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="generate_visualization" value="true">
+                    <div class="mb-3">
+                        <label for="selected_column" class="form-label">Select Numeric Column for Y-axis</label>
+                        <select name="selected_column" class="form-select">
+                            {% for col in numeric_cols %}
+                            <option value="{{ col }}">{{ col }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="visualization_type" class="form-label">Select Visualization Type</label>
+                        <select name="visualization_type" class="form-select">
+                            <option value="Line Plot">Line Plot</option>
+                            <option value="Box Plot">Box Plot</option>
+                            <option value="Histogram">Histogram</option>
+                            <option value="KDE Plot">KDE Plot</option>
+                            <option value="Violin Plot">Violin Plot</option>
+                            <option value="Scatter Plot">Scatter Plot</option>
+                        </select>
+                    </div>
+                    <div id="scatter-column-section" class="mb-3 d-none">
+                        <label for="scatter_column" class="form-label">Select Numeric Column for X-axis (Scatter Plot)</label>
+                        <select name="scatter_column" class="form-select">
+                            {% for col in numeric_cols %}
+                            <option value="{{ col }}">{{ col }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Visualization</button>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if stats %}
+            <!-- Statistics Display -->
+            <div class="border p-4 mb-4 bg-light rounded">
+                <h3 class="h5">Statistics</h3>
+                <ul class="list-unstyled">
+                    {% for key, value in stats.items %}
+                    <li><strong>{{ key }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if chart %}
+            <!-- Visualization Display -->
+            <div class="text-center">
+                <h3 class="h5">Visualization</h3>
+                <img src="data:image/png;base64,{{ chart }}" alt="Chart" class="img-fluid rounded shadow-lg mt-4">
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js (for modal functionality if needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
